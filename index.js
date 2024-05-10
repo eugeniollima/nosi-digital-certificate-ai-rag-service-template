@@ -78,7 +78,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 
 // Rota para processar e indexar certificados usando Pinecone e Langchain com OpenAI
-app.post("/certificates-free", async (req, res) => {
+app.post("/index", async (req, res) => {
 
   // Extrai os dados do certificado do body da requisição
   const {
@@ -101,9 +101,9 @@ app.post("/certificates-free", async (req, res) => {
   const docs = [
     new Document({
       metadata: { ...req.body },
-      pageContent: `Certificate of achievement, this certificate is awarded to ${recipientName}, 
-      has successfully completed the course ${courseName} - ${courseDescription} issued at ${issueDate}`,
-    }),
+      pageContent: `Certificado de realização, este certificado é concedido a ${recipientName}, 
+    por ter concluído com êxito o curso ${courseName} - ${courseDescription}, emitido em ${issueDate}`,
+  }),
   ];
 
   // inicia um modelo de text embeddings
@@ -124,7 +124,7 @@ app.post("/certificates-free", async (req, res) => {
 
 
 // Rota para consultar certificados indexados
-app.get("/query-certificates-free", async (req, res) => {
+app.get("/search", async (req, res) => {
 
 
   const model = new OpenAI({
@@ -166,12 +166,12 @@ app.get("/query-certificates-free", async (req, res) => {
 
   // TODO: criar um prompt para o LLM em portugues
   const prompt =
-    ChatPromptTemplate.fromTemplate(`You are an helpful AI assistant that Answer
-    the following question based only on the provided context,  if you dont know the answer, just say 'I dont know.':
+    ChatPromptTemplate.fromTemplate(`Você é um assistente de IA prestativo que responde
+    à seguinte pergunta baseado apenas no contexto fornecido. Se você não souber a resposta, apenas diga 'Eu não sei.':
   {context}
-  Question: {input}
-  Helpful Answer:
- `);
+  Pergunta: {input}
+  Resposta útil:
+  `);
 
 
   const documentChain = await createStuffDocumentsChain({
